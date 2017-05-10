@@ -42,7 +42,7 @@ except ImportError as error:
 # BOT CODE
 #
 
-INTERVAL_MINUTES = 10
+INTERVAL_MINUTES = 1
 
 def setup():
     # Login to Twitter
