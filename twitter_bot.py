@@ -19,6 +19,10 @@ from tweet_text import *
 # import all functions from helper.py
 from helper import *
 
+import requests
+import json
+import datetime
+
 # Try to import the variables defined in credentials.py
 # If that does not exist (e.g. on Heroku), fall back to environment variables
 try:
@@ -63,27 +67,43 @@ def tweet(account):
     mentions = account.get_mentions_timeline()
     rate_limit_remaining = account.get_lastfunction_header('x-rate-limit-remaining')
     print('rate limit remaining', rate_limit_remaining)
-    # for each mention
-    for tweet in mentions:
-        # if the tweet was sent after the last time we checked mentions
-        if tweet_minutes_ago(tweet) < INTERVAL_MINUTES:
-            # get reply from tweet_text.py
-            reply_text = reply(tweet)
-            if reply_text is not None:
-                replied = True
-                try:
-                    print('Replying to https://twitter.com/statuses/{id}'.format(id=tweet['id']))
-                    sent_tweet = account.update_status(status=reply_text, in_reply_to_status_id=tweet['id'])
-                    print('https://twitter.com/statuses/{id}'.format(id=sent_tweet['id']))
-                except TwythonError as e:
-                    print(e)
-    if not replied:
-        # from tweet_text.py
-        text = idle_text()
-        # Send the tweet!
+
+    repos_str = requests.request(url='https://api.github.com/users/klauck/repos', method='GET').text
+
+    repositories = json.loads(repos_str)
+    updated_repositories = []
+    for repository in repositories:
+        updated_at = datetime.datetime.strptime(repository['pushed_at'][:10], '%Y-%m-%d').date()
+        if updated_at == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
+            updated_repositories.append(repository['full_name'])
+
+    if len(updated_repositories) > 0:
+        text = 'New commits for: %s' % (', '.join(updated_repositories))
         tweet = account.update_status(status=text)
-        # Print some info on the sent tweet
         print('https://twitter.com/statuses/{id}'.format(id=tweet['id']))
+
+
+    # # for each mention
+    # for tweet in mentions:
+    #     # if the tweet was sent after the last time we checked mentions
+    #     if tweet_minutes_ago(tweet) < INTERVAL_MINUTES:
+    #         # get reply from tweet_text.py
+    #         reply_text = reply(tweet)
+    #         if reply_text is not None:
+    #             replied = True
+    #             try:
+    #                 print('Replying to https://twitter.com/statuses/{id}'.format(id=tweet['id']))
+    #                 sent_tweet = account.update_status(status=reply_text, in_reply_to_status_id=tweet['id'])
+    #                 print('https://twitter.com/statuses/{id}'.format(id=sent_tweet['id']))
+    #             except TwythonError as e:
+    #                 print(e)
+    # if not replied:
+    #     # from tweet_text.py
+    #     text = idle_text()
+    #     # Send the tweet!
+    #     tweet = account.update_status(status=text)
+    #     # Print some info on the sent tweet
+    #     print('https://twitter.com/statuses/{id}'.format(id=tweet['id']))
 
 if __name__ == "__main__":
     account = setup()
