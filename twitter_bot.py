@@ -20,7 +20,6 @@ from tweet_text import *
 from helper import *
 
 import requests
-import json
 import datetime
 
 # Try to import the variables defined in credentials.py
@@ -68,9 +67,7 @@ def tweet(account):
     rate_limit_remaining = account.get_lastfunction_header('x-rate-limit-remaining')
     print('rate limit remaining', rate_limit_remaining)
 
-    repos_str = requests.request(url='https://api.github.com/users/klauck/repos', method='GET').text
-
-    repositories = json.loads(repos_str)
+    repositories = requests.get('https://api.github.com/users/klauck/repos').json()
     updated_repositories = []
     for repository in repositories:
         updated_at = datetime.datetime.strptime(repository['pushed_at'][:10], '%Y-%m-%d').date()
