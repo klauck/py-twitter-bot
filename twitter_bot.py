@@ -45,8 +45,6 @@ except ImportError as error:
 # BOT CODE
 #
 
-INTERVAL_MINUTES = 1440
-
 def setup():
     # Login to Twitter
     account = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
@@ -79,28 +77,6 @@ def tweet(account):
         tweet = account.update_status(status=text)
         print('https://twitter.com/statuses/{id}'.format(id=tweet['id']))
 
-
-    # # for each mention
-    # for tweet in mentions:
-    #     # if the tweet was sent after the last time we checked mentions
-    #     if tweet_minutes_ago(tweet) < INTERVAL_MINUTES:
-    #         # get reply from tweet_text.py
-    #         reply_text = reply(tweet)
-    #         if reply_text is not None:
-    #             replied = True
-    #             try:
-    #                 print('Replying to https://twitter.com/statuses/{id}'.format(id=tweet['id']))
-    #                 sent_tweet = account.update_status(status=reply_text, in_reply_to_status_id=tweet['id'])
-    #                 print('https://twitter.com/statuses/{id}'.format(id=sent_tweet['id']))
-    #             except TwythonError as e:
-    #                 print(e)
-    # if not replied:
-    #     # from tweet_text.py
-    #     text = idle_text()
-    #     # Send the tweet!
-    #     tweet = account.update_status(status=text)
-    #     # Print some info on the sent tweet
-    #     print('https://twitter.com/statuses/{id}'.format(id=tweet['id']))
 
 if __name__ == "__main__":
     account = setup()
